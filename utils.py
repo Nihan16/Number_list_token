@@ -27,3 +27,4 @@ def get_next_names(start_index: int = 0, count: int = 10) -> list[str]:
     except Exception as e:
         print(f"An error occurred while reading names.txt: {e}")
         return []
+
