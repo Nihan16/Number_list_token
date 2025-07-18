@@ -1,4 +1,4 @@
-import os # এই লাইনটি যেন থাকে
+import os
 
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackContext, filters
@@ -13,16 +13,14 @@ keyboard = [
 ]
 markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
-# এখানে পরিবর্তন করা হয়েছে
-async def start(update: Update, context: CallbackContext): # .DEFAULT_TYPE অংশটি বাদ দিন
+async def start(update: Update, context: CallbackContext):
     """Handles the /start command, sends a welcome message and the main keyboard."""
     await update.message.reply_text(
         "👋 স্বাগতম! আপনি কি করতে চান?",
         reply_markup=markup
     )
 
-# এখানে পরিবর্তন করা হয়েছে
-async def handle_message(update: Update, context: CallbackContext): # .DEFAULT_TYPE অংশটি বাদ দিন
+async def handle_message(update: Update, context: CallbackContext):
     """Handles all text messages from the user."""
     user_id = update.message.from_user.id
     text = update.message.text.strip()
@@ -32,31 +30,34 @@ async def handle_message(update: Update, context: CallbackContext): # .DEFAULT_T
             user_progress_numbers[user_id] = 0
         
         start_index = user_progress_numbers[user_id]
-        numbers = get_next_numbers(start_index, 10)
+        numbers = get_next_numbers(start_index, 10) # 10টি নাম্বার আনা হবে
 
         if not numbers:
             await update.message.reply_text("❌ আর কোনো নাম্বার নেই! অ্যাডমিনকে `numbers.txt` আপডেট করতে বলুন।")
             return
         
-        user_progress_numbers[user_id] += 10
+        # প্রতিটি নাম্বার আলাদা আলাদা মেসেজে পাঠানো হবে
+        for num in numbers:
+            await update.message.reply_text(f"`{num}`", parse_mode="Markdown") # Markdown ব্যবহার করে কপি করা সহজ হবে
         
-        formatted_numbers = "\n".join([f"`{num}`" for num in numbers])
-        await update.message.reply_text(formatted_numbers, parse_mode="Markdown")
+        user_progress_numbers[user_id] += 10 # 10টি নাম্বার এগিয়ে যাওয়া হবে
 
     elif text == "🧑‍💻 Get Name":
         if user_id not in user_progress_names:
             user_progress_names[user_id] = 0
         
         start_index = user_progress_names[user_id]
-        names = get_next_names(start_index, 10)
+        names = get_next_names(start_index, 5) # 5টি নাম আনা হবে
 
         if not names:
             await update.message.reply_text("❌ আর কোনো নাম নেই! অ্যাডমিনকে `names.txt` আপডেট করতে বলুন।")
             return
         
-        user_progress_names[user_id] += 10
+        # প্রতিটি নাম আলাদা আলাদা মেসেজে পাঠানো হবে
+        for name in names:
+            await update.message.reply_text(f"`{name}`", parse_mode="Markdown") # Markdown ব্যবহার করে কপি করা সহজ হবে
         
-        await update.message.reply_text("\n".join(names))
+        user_progress_names[user_id] += 5 # 5টি নাম এগিয়ে যাওয়া হবে
 
 def main():
     """Sets up the Telegram bot application and runs it."""
@@ -75,4 +76,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
