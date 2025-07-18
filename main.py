@@ -1,6 +1,8 @@
+import os # এই লাইনটি যোগ করা হয়েছে
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackContext, filters
-from config import BOT_TOKEN
+# from config import BOT_TOKEN # এই লাইনটি আর প্রয়োজন নেই
+
 from utils import get_next_numbers, get_next_names
 
 user_progress_numbers = {}
@@ -56,7 +58,13 @@ async def handle_message(update: Update, context: CallbackContext.DEFAULT_TYPE):
 
 def main():
     """Sets up the Telegram bot application and runs it."""
-    application = ApplicationBuilder().token(BOT_TOKEN).build()
+    # os.getenv() ব্যবহার করে এনভায়রনমেন্ট ভেরিয়েবল থেকে টোকেন নেওয়া হয়েছে
+    token = os.getenv("BOT_TOKEN") 
+    if not token:
+        print("Error: BOT_TOKEN environment variable not set. Please set it in Railway or your local environment.")
+        return # টোকেন না পেলে বট চালু হবে না
+
+    application = ApplicationBuilder().token(token).build()
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
@@ -66,3 +74,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
