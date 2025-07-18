@@ -1,7 +1,7 @@
-import os # এই লাইনটি যোগ করা হয়েছে
+import os # এই লাইনটি যেন থাকে
+
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackContext, filters
-# from config import BOT_TOKEN # এই লাইনটি আর প্রয়োজন নেই
 
 from utils import get_next_numbers, get_next_names
 
@@ -13,14 +13,16 @@ keyboard = [
 ]
 markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
-async def start(update: Update, context: CallbackContext.DEFAULT_TYPE):
+# এখানে পরিবর্তন করা হয়েছে
+async def start(update: Update, context: CallbackContext): # .DEFAULT_TYPE অংশটি বাদ দিন
     """Handles the /start command, sends a welcome message and the main keyboard."""
     await update.message.reply_text(
         "👋 স্বাগতম! আপনি কি করতে চান?",
         reply_markup=markup
     )
 
-async def handle_message(update: Update, context: CallbackContext.DEFAULT_TYPE):
+# এখানে পরিবর্তন করা হয়েছে
+async def handle_message(update: Update, context: CallbackContext): # .DEFAULT_TYPE অংশটি বাদ দিন
     """Handles all text messages from the user."""
     user_id = update.message.from_user.id
     text = update.message.text.strip()
@@ -58,11 +60,10 @@ async def handle_message(update: Update, context: CallbackContext.DEFAULT_TYPE):
 
 def main():
     """Sets up the Telegram bot application and runs it."""
-    # os.getenv() ব্যবহার করে এনভায়রনমেন্ট ভেরিয়েবল থেকে টোকেন নেওয়া হয়েছে
     token = os.getenv("BOT_TOKEN") 
     if not token:
         print("Error: BOT_TOKEN environment variable not set. Please set it in Railway or your local environment.")
-        return # টোকেন না পেলে বট চালু হবে না
+        return
 
     application = ApplicationBuilder().token(token).build()
 
