@@ -1,5 +1,1 @@
-import os
-
-BOT_TOKEN = os.getenv("BOT_TOKEN")  # Set this in Railway Env Vars
-NUMBERS_FILE = "numbers.txt"
-NAMES_FILE = "names.txt"
+BOT_TOKEN = "7832798863:AAFmLFH0xzKZzIbEBcCNNn02M_0oy4chTRs
