@@ -1,49 +1,66 @@
-from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackContext, filters
-from config import BOT_TOKEN
-from utils import get_next_numbers, get_next_names
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from config import BOT_TOKEN, NUMBERS_FILE, NAMES_FILE
+import os
 
-user_progress_numbers = {}
-user_progress_names = {}
+# 📤 Send Numbers
+async def send_numbers(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not os.path.exists(NUMBERS_FILE):
+        await update.message.reply_text("📁 numbers.txt ফাইল পাওয়া যায়নি!")
+        return
 
-keyboard = [[
-    "📞 Get Number", "🧑 Get Name"
-]]
-markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    with open(NUMBERS_FILE, "r", encoding="utf-8") as file:
+        lines = file.readlines()
 
-async def start(update: Update, context: CallbackContext.DEFAULT_TYPE):
-    await update.message.reply_text("👋 স্বাগতম! আপনি কী করতে চান?", reply_markup=markup)
+    if not lines:
+        await update.message.reply_text("⚠️ কোনো নাম্বার নেই ফাইলে!")
+        return
 
-async def handle_message(update: Update, context: CallbackContext.DEFAULT_TYPE):
-    user_id = update.message.from_user.id
-    text = update.message.text
+    count = 0
+    message = ""
+    for line in lines:
+        line = line.strip()
+        if line:
+            message += f"`{line}`\n"
+            count += 1
+        if count == 10:
+            break
 
-    if text == "📞 Get Number":
-        if user_id not in user_progress_numbers:
-            user_progress_numbers[user_id] = 0
-        start_index = user_progress_numbers[user_id]
-        numbers = get_next_numbers(start_index, 10)
-        if not numbers:
-            await update.message.reply_text("❌ আর কোনো নাম্বার নেই! Admin `numbers.txt` আপডেট করুন।")
-            return
-        user_progress_numbers[user_id] += 10
-        await update.message.reply_text("\n".join(numbers))
+    await update.message.reply_text(message, parse_mode="Markdown")
 
-    elif text == "🧑 Get Name":
-        if user_id not in user_progress_names:
-            user_progress_names[user_id] = 0
-        start_index = user_progress_names[user_id]
-        names = get_next_names(start_index, 10)
-        if not names:
-            await update.message.reply_text("❌ আর কোনো নাম নেই! Admin `names.txt` আপডেট করুন।")
-            return
-        user_progress_names[user_id] += 10
-        await update.message.reply_text("\n".join(names))
+# 📤 Send Names
+async def send_names(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not os.path.exists(NAMES_FILE):
+        await update.message.reply_text("📁 names.txt ফাইল পাওয়া যায়নি!")
+        return
 
-app = ApplicationBuilder().token(BOT_TOKEN).build()
-app.add_handler(CommandHandler("start", start))
-app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
+    with open(NAMES_FILE, "r", encoding="utf-8") as file:
+        lines = file.readlines()
 
+    if not lines:
+        await update.message.reply_text("⚠️ কোনো নাম নেই ফাইলে!")
+        return
+
+    count = 0
+    message = ""
+    for line in lines:
+        line = line.strip()
+        if line:
+            message += f"`{line}`\n"
+            count += 1
+        if count == 10:
+            break
+
+    await update.message.reply_text(message, parse_mode="Markdown")
+
+# 🔰 Start Command
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("✅ Bot is active.\nSend /numbers or /names to get data.")
+
+# 🚀 Run the Bot
 if __name__ == "__main__":
-    print("Bot running...")
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("numbers", send_numbers))
+    app.add_handler(CommandHandler("names", send_names))
     app.run_polling()
