@@ -47,3 +47,4 @@ app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message
 if __name__ == "__main__":
     print("Bot running...")
     app.run_polling()
+
